@@ -3,7 +3,6 @@ set -e
 
 REPO_URL="${repo_url}"
 NEW_BRANCH="${new_branch}"
-GITHUB_TOKEN="${github_token}"
 WORKSPACE_FOLDER="$HOME"
 
 if [ -n "$REPO_URL" ]; then
@@ -24,9 +23,12 @@ if [ -n "$REPO_URL" ]; then
             echo "Switched to branch '$NEW_BRANCH'."
         fi
 
-        # Authenticate with ghcr.io if a token was provided
-        if [ -n "$GITHUB_TOKEN" ]; then
-            echo "$GITHUB_TOKEN" | docker login ghcr.io -u coder --password-stdin 2>/dev/null || echo "Warning: ghcr.io login failed (non-critical)"
+        # Authenticate with ghcr.io using Coder's existing GitHub token (if available)
+        if command -v coder > /dev/null 2>&1; then
+            GH_TOKEN=$(coder external-auth access-token github 2>/dev/null || echo "")
+            if [ -n "$GH_TOKEN" ]; then
+                echo "$GH_TOKEN" | docker login ghcr.io -u coder --password-stdin 2>/dev/null || echo "Warning: ghcr.io login failed (non-critical)"
+            fi
         fi
 
         # Wait for the devcontainer CLI to be installed (installed in parallel)
