@@ -2,6 +2,7 @@
 set -e
 
 REPO_URL="${repo_url}"
+NEW_BRANCH="${new_branch}"
 WORKSPACE_FOLDER="$HOME"
 
 if [ -n "$REPO_URL" ]; then
@@ -14,6 +15,14 @@ if [ -n "$REPO_URL" ]; then
         TIMEOUT=$((TIMEOUT - 2))
     done
     if [ -d "$WORKSPACE_FOLDER" ]; then
+        # If a new branch name was provided, checkout or create it
+        if [ -n "$NEW_BRANCH" ]; then
+            cd "$WORKSPACE_FOLDER"
+            echo "Setting up branch '$NEW_BRANCH'..."
+            git checkout "$NEW_BRANCH" 2>/dev/null || git checkout -b "$NEW_BRANCH"
+            echo "Switched to branch '$NEW_BRANCH'."
+        fi
+
         if [ -f "$WORKSPACE_FOLDER/.devcontainer/devcontainer.json" ]; then
             echo "Devcontainer configuration found at .devcontainer/devcontainer.json. Starting devcontainer..."
             devcontainer up --workspace-folder "$WORKSPACE_FOLDER"

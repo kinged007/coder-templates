@@ -16,9 +16,10 @@ locals {
   # (Docker-in-Docker) and Node.js.
   workspace_image = "codercom/enterprise-node:ubuntu"
 
-  has_repo         = data.coder_parameter.repo_url.value != ""
-  repo_folder      = try(module.git-clone[0].folder_name, "")
-  workspace_folder = local.has_repo ? "~/${local.repo_folder}" : "~"
+  has_repo           = data.coder_parameter.repo_url.value != ""
+  repo_folder        = try(module.git-clone[0].folder_name, "")
+  workspace_folder   = local.has_repo ? "~/${local.repo_folder}" : "~"
+  code_server_folder = local.has_repo ? "/home/coder/${local.repo_folder}" : "/home/coder"
 }
 
 variable "docker_socket" {
@@ -32,6 +33,15 @@ data "coder_parameter" "repo_url" {
   name         = "repo_url"
   display_name = "Git Repository"
   description  = "Enter the URL of a Git repository to clone. If provided, the workspace will clone it and attempt to start a devcontainer. Leave empty to skip cloning and work in the home directory."
+  default      = ""
+  mutable      = true
+}
+
+data "coder_parameter" "new_branch" {
+  type         = "string"
+  name         = "new_branch"
+  display_name = "New Branch Name"
+  description  = "Optional: after cloning, checkout or create this branch. If the branch does not exist, it will be created from HEAD. Useful for starting work on a new feature branch."
   default      = ""
   mutable      = true
 }
@@ -183,6 +193,7 @@ module "code-server" {
   source   = "registry.coder.com/coder/code-server/coder"
   version  = "1.5.0"
   agent_id = coder_agent.main.id
+  folder     = local.code_server_folder
   extensions = [
     "dracula-theme.theme-dracula"
   ]
@@ -209,7 +220,8 @@ resource "coder_script" "setup_devcontainer" {
   run_on_start = true
   icon         = "/icon/docker.svg"
   script       = templatefile("${path.module}/scripts/setup-devcontainer.sh", {
-    repo_url = data.coder_parameter.repo_url.value
+    repo_url  = data.coder_parameter.repo_url.value
+    new_branch = data.coder_parameter.new_branch.value
   })
 }
 
