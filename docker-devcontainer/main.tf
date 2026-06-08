@@ -177,6 +177,17 @@ module "devcontainers-cli" {
   version = "~> 1.0"
 }
 
+# See https://registry.coder.com/modules/coder/code-server
+module "code-server" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/code-server/coder"
+  version  = "1.5.0"
+  agent_id = coder_agent.main.id
+  extensions = [
+    "dracula-theme.theme-dracula"
+  ]
+}
+
 # See https://registry.coder.com/modules/coder/git-clone
 module "git-clone" {
   count    = data.coder_workspace.me.start_count * (local.has_repo ? 1 : 0)
