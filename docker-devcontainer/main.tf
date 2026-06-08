@@ -46,6 +46,16 @@ data "coder_parameter" "new_branch" {
   mutable      = true
 }
 
+data "coder_parameter" "github_token" {
+  type         = "string"
+  name         = "github_token"
+  display_name = "GitHub Token (for ghcr.io)"
+  description  = "Optional: a GitHub personal access token with read:packages scope. Used to authenticate with ghcr.io if your devcontainer features require it."
+  default      = ""
+  mutable      = false
+  sensitive    = true
+}
+
 provider "docker" {
   # Defaulting to null if the variable is an empty string lets us have an optional variable without having to set our own default
   host = var.docker_socket != "" ? var.docker_socket : null
@@ -220,8 +230,9 @@ resource "coder_script" "setup_devcontainer" {
   run_on_start = true
   icon         = "/icon/docker.svg"
   script       = templatefile("${path.module}/scripts/setup-devcontainer.sh", {
-    repo_url  = data.coder_parameter.repo_url.value
-    new_branch = data.coder_parameter.new_branch.value
+    repo_url    = data.coder_parameter.repo_url.value
+    new_branch  = data.coder_parameter.new_branch.value
+    github_token = data.coder_parameter.github_token.value
   })
 }
 
