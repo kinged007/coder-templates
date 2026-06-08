@@ -3,12 +3,16 @@ set -e
 
 REPO_URL="${repo_url}"
 NEW_BRANCH="${new_branch}"
+REPO_FOLDER="${repo_folder}"
 WORKSPACE_FOLDER="$HOME"
 
 if [ -n "$REPO_URL" ]; then
-    FOLDER_NAME=$(basename "$REPO_URL" .git)
-    WORKSPACE_FOLDER="$HOME/$FOLDER_NAME"
-    echo "Waiting for repository to be cloned into '$FOLDER_NAME'..."
+    if [ -n "$REPO_FOLDER" ]; then
+        WORKSPACE_FOLDER="$HOME/$REPO_FOLDER"
+    else
+        WORKSPACE_FOLDER="$HOME"
+    fi
+    echo "Waiting for repository to be cloned into '$REPO_FOLDER'..."
     TIMEOUT=60
     while [ ! -d "$WORKSPACE_FOLDER" ] && [ $TIMEOUT -gt 0 ]; do
         sleep 2
@@ -55,10 +59,10 @@ if [ -n "$REPO_URL" ]; then
             devcontainer up --workspace-folder "$WORKSPACE_FOLDER"
             echo "Devcontainer started successfully."
         else
-            echo "No devcontainer configuration found in '$FOLDER_NAME'."
+            echo "No devcontainer configuration found in '$REPO_FOLDER'."
         fi
     else
-        echo "Repository folder '$FOLDER_NAME' not found after waiting."
+        echo "Repository folder '$REPO_FOLDER' not found after waiting."
     fi
 else
     echo "No repository URL provided. Working directory: $HOME"

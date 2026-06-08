@@ -220,8 +220,9 @@ resource "coder_script" "setup_devcontainer" {
   run_on_start = true
   icon         = "/icon/docker.svg"
   script       = templatefile("${path.module}/scripts/setup-devcontainer.sh", {
-    repo_url   = data.coder_parameter.repo_url.value
-    new_branch = data.coder_parameter.new_branch.value
+    repo_url    = data.coder_parameter.repo_url.value
+    new_branch  = data.coder_parameter.new_branch.value
+    repo_folder = local.repo_folder
   })
 }
 
