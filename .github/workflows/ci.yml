@@ -1,0 +1,18 @@
+name: ci
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Terraform fmt
+        run: |
+          if command -v terraform >/dev/null 2>&1; then
+            terraform fmt -check -recursive || (terraform fmt -diff -recursive; exit 1)
+          else
+            echo "terraform not installed — skipping fmt check"
+          fi

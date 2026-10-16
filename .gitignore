@@ -3,3 +3,11 @@ terraform.tfstate*
 terraform.tfvars
 *.tfplan
 .cache/
+
+.env
+.env.*
+node_modules/
+dist/
+.next/
+coverage/
+*.log
